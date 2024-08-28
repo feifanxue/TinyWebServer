@@ -1,5 +1,4 @@
-#pragma pack(4)
-#include "TP.h"
+#include "threadPool.h"
 
 ThreadPool::ThreadPool(int min, int max) : m_minThread(min), 
 m_maxThread(max), m_curThread(min), m_idlThread(min), m_stop(false) {
