@@ -1,3 +1,6 @@
+#ifndef _MYSQLCONN_H_
+#define _MYSQLCONN_H_
+
 #include <iostream>
 #include <mysql/mysql.h>
 #include <chrono>
@@ -39,3 +42,5 @@ private:
     MYSQL_ROW m_row = nullptr;
     steady_clock::time_point m_aliveTime;
 };
+
+#endif

@@ -1,7 +1,6 @@
 #include "SqlConnPool.h"
 #include <json/json.h>
 #include <fstream>
-#include <thread>
 
 using namespace Json;
 
@@ -14,6 +13,7 @@ SqlConnPool::SqlConnPool() {
     if(!parseJsonFile()) {
         return;
     }
+    m_stop = false;
     for(size_t i = 0; i < m_minSize; i++) {
         addConnection();
     }
@@ -24,6 +24,8 @@ SqlConnPool::SqlConnPool() {
 }
 
 SqlConnPool::~SqlConnPool() {
+    m_stop = true;
+    m_cond.notify_all();
     while(!m_connectionQ.empty()) {
         MysqlConn* conn = m_connectionQ.front();
         m_connectionQ.pop();
@@ -32,7 +34,7 @@ SqlConnPool::~SqlConnPool() {
 }
 
 void SqlConnPool::produceConnection() {
-    while(true) {
+    while(!m_stop) {
         unique_lock<mutex> locker(m_mutexQ);
         while(m_connectionQ.size() >= m_minSize) {
             m_cond.wait(locker);
@@ -43,7 +45,7 @@ void SqlConnPool::produceConnection() {
 }
 
 void SqlConnPool::recycleConnection() {
-    while(true) {
+    while(!m_stop) {
         this_thread::sleep_for(chrono::milliseconds(500));
         unique_lock<mutex> locker(m_mutexQ);
         while(m_connectionQ.size() > m_minSize) {
@@ -87,7 +89,7 @@ shared_ptr<MysqlConn> SqlConnPool::getConnection() {
 }
 
 bool SqlConnPool::parseJsonFile() {
-    ifstream ifs("../../config/dbconf.json");
+    ifstream ifs("./config/dbconf.json");
     Reader rd;
     Value root;
     rd.parse(ifs, root);

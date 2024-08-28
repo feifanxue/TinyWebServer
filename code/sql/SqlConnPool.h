@@ -1,5 +1,9 @@
+#ifndef _SQLCONNPOOL_H_
+#define _SQLCONNPOOL_H_
+
 #include <queue>
 #include <mutex>
+#include <thread>
 #include <condition_variable>
 #include "MysqlConn.h"
 
@@ -29,7 +33,10 @@ private:
     size_t m_maxSize;
     int m_timeout;
     int m_maxIdleTime;
+    bool m_stop;
     queue<MysqlConn*> m_connectionQ;
     mutex m_mutexQ;
     condition_variable m_cond;
 };
+
+#endif
