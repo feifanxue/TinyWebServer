@@ -1,0 +1,5 @@
+# bin目录
+bin/
+
+# vscode配置
+.vscode/
